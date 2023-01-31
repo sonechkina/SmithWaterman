@@ -1,0 +1,28 @@
+---
+title: "An itroduction to SmithWaterman"
+author: "Maria Sonechkina"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{An introduction to SmithWaterman}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Mutation Position Format (MPF) {#mpf}
+
+(... some text ...)
+
+# Variant Call Format (VCF) {#vcf}
+
+Unlike the MPF format described in Section \@ref(mpf), the VCF format has an elaborate header section (... some more text ...)
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(SmithWaterman)
+```
