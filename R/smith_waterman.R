@@ -36,7 +36,7 @@ smith_waterman <- function(seq1, seq2, match, mismatch, gap) {
   cols <- nchar(seq1)
   rows <- nchar(seq2)
 
-  # Score-matrix
+  # Scoring matrix
   m <- matrix(0, rows+1, cols+1)
   # Assign names of columns and rows to the score-matrix
   colnames(m) <- c("", seq1_splitted)
