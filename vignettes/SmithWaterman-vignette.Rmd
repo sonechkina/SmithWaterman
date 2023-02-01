@@ -67,7 +67,7 @@ The output of the function will be the two aligned sequences in form of a list, 
 ```{r eval=FALSE} 
 smith_waterman <- function(seq1, seq2, match, mismatch, gap) {
   ...
-  return(list(alseq1, alseq2))
+  return(list(alseqs = matrix(c(alseq1, alseq2), byrow = TRUE, nrow = 2)))
 }
 ```
 
