@@ -28,17 +28,17 @@ smith_waterman <- function(seq1, seq2, match, mismatch, gap) {
   if(!is.numeric(mismatch)) stop("Mismatch score must be a a number")
   if(!is.numeric(gap)) stop("Gap score must be a a number")
 
-  # Produce a vector with all the characters in the sequences
-  seq1_splitted <- unlist(strsplit(seq1, ""))
-  seq2_splitted <- unlist(strsplit(seq2, ""))
-
-  # Generating the empty matrices for storing scores and tracing
+  # Produce a vector of the size of the strings for building the scoring matrix
   cols <- nchar(seq1)
   rows <- nchar(seq2)
 
+  # Produce a vector with each character in the strings
+  seq1_splitted <- unlist(strsplit(seq1, ""))
+  seq2_splitted <- unlist(strsplit(seq2, ""))
+
   # Scoring matrix
   m <- matrix(0, rows+1, cols+1)
-  # Assign names of columns and rows to the score-matrix
+  # Assign names of columns and rows to the scoring matrix
   colnames(m) <- c("", seq1_splitted)
   rownames(m) <- c("", seq2_splitted)
 
@@ -47,7 +47,7 @@ smith_waterman <- function(seq1, seq2, match, mismatch, gap) {
 
   #----------------------------------------------------------------------------#
 
-  # Smith-Waterman algorithm with local alignments scores in score-matrix
+  # Smith-Waterman algorithm with local alignments scores in scoring matrix
 
   for (i in 2:nrow(m)){
 
@@ -66,17 +66,17 @@ smith_waterman <- function(seq1, seq2, match, mismatch, gap) {
         score_diag <- m[i-1,j-1] + mismatch
       }
 
-      # Taking the highest score
-      all_scores <- c(score_left, score_up, score_diag)
-      m[i,j] <- max(all_scores)
-
-      # Initializing the tracing matrix from the highest score
-      m_trace[i,j] <- which(all_scores == m[i,j])[1]
-
       # Turning negative values to zeros
       if (m[i,j] < 0) {
         m[i,j] <- 0
       }
+
+      # Taking the highest score
+      all_scores <- c(score_left, score_up, score_diag)
+      m[i,j] <- max(all_scores)
+
+      # Filling the tracing matrix
+      m_trace[i,j] <- which(all_scores == m[i,j])[1]
     }
   }
 

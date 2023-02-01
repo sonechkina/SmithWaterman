@@ -1,0 +1,252 @@
+---
+title: "The SmithWaterman package"
+author: "Maria Sonechkina"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Report on SmithWaterman package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## Introduction
+
+The main goal of this package is to perform a local pairwise alignment between two sequences using the Smith-Waterman algorithm. For that, the package is composed of one single function that implements the Smith-Waterman algorithm in `RStudio`.
+
+## History and motivation
+
+In the field of molecular sequence analysis, an important problem has been the identification of homologous subsequences given a set of long sequences. 
+
+This task of sequences alignment is used also for non-biological sequences, but in bionformatics this procedure is performed in order to identify some regions of similarity that could be the consequence of functional, structural or evolutionary relationships between the sequences.  
+
+However, the issue that arises with biological sequences is that it is necessary to consider the presence of typical mutations in genomic DNA, such as substitutions or deletions/insertions.
+
+The first developments began with the Needleman & Wunsch algorithm (1970), an heuristic homology algorithm which first introduced an iterative matrix method and it is widely used for pairwise global sequence alignment tasks.
+
+After that, it has been developed a true metric measure of the distance between sequences (Sellers, 1974), that has been generalized by Waterman _et al._ (1976) to take into account the deletions/insertions of any length. This metric measures the minimum number of "mutational events" required to convert one sequence into another.
+
+Then, the Smith-Waterman algorithm has extended the original idea of the homology algorithm by Needleman & Wunsch and aims to find a pair of segments, one from each of the two long sequences, such that there is no other pair of segments with greater similarity.
+This procedure is different than the Needleman-Wunsch algorithm since it finds the best local alignment between two subsequences with respect to the scoring system being used, instead of the global one.
+
+Another difference from the Needleman & Wunsch algorithm is that the Smith-Waterman algorithm compares segments of all possible lengths and optimizes the similarity measure, instead of looking at the entire sequence.
+
+Therefore, the main motivation to use the local pairwise alignment algorithm is that it is difficult to obtain correct alignments in regions of low similarity between distantly related sequences, since mutation has added noise over evolutionary time to allow meaningful comparison of those regions.
+
+## Development process
+
+In order to develop the package, one has to keep in mind that the main concept of Smith-Waterman algorithm is that it exploits the dynamic programming approach. 
+
+In fact there is a first phase which culminates with a computed __scoring matrix__ and afterwards a second phase called __'traceback'__ that starts from the highest score of the scoring matrix and through a series of recursion ends with the matrix cell that has a score of 0. This phase is in fact an optimization step that finds solutions to smaller pieces of the problem and then puts them all together to form a complete final solution to the entire problem, so it allows to generate the best local alignment.
+
+One initial regard is that Smith-Waterman algorithm aligns two sequences by considering the "mutational events", as:
+
+- matches,
+
+- mismatches, which represent the substitutions in the  biological sequence,
+
+- gaps, which are introduced by insertions and deletions in the biological sequences.
+
+### Main steps
+
+The inputs of the function are of two types:
+
+1. two strings that correspond to the sequences that you want to align;
+
+2. three numerical values that correspond to the scores for matches, mismatches and gaps. The general idea is to assign positive scores to the matches and lower ones to the mismatches. The gap penalty determines the score cost for the presence of gaps.
+
+The output of the function will be the two aligned sequences in form of a list, since it allows to observe the alignment of the sequences one above the other.
+
+```{r eval=FALSE} 
+smith_waterman <- function(seq1, seq2, match, mismatch, gap) {
+  ...
+  return(list(alseq1, alseq2))
+}
+```
+
+
+#### 1. Initialization of the scoring and tracing matrices
+
+After checking if the inputs for the scores are in fact numerical, you can move to the core of this first initialization part that regards the two input string sequences, which is building the scoring matrix and the tracing matrix.
+
+The scoring matrix consists of having the first sequence as column and the second sequence as row of the matrix. So, first the strings are vectorized and then the sequences are split in single characters that will assume the names of the column and row of the matrix. 
+
+The dimensions of the scoring matrix are the lengths of each sequence + 1 and all the elements are set to zero, it's only in the second part that the matrix will be filled with scores. 
+
+At this point, the tracing matrix is an exact copy of the original scoring matrix and it will be at the end of the scoring procedure.
+
+```{r eval=FALSE} 
+# Check if the scores are numeric types
+if(!is.numeric(match)) stop("Match score must be a a number")
+if(!is.numeric(mismatch)) stop("Mismatch score must be a a number")
+if(!is.numeric(gap)) stop("Gap score must be a a number")
+
+# Produce a vector of the size of the strings for building the scoring matrix
+cols <- nchar(seq1)
+rows <- nchar(seq2)
+
+# Produce a vector with each character in the strings
+seq1_splitted <- unlist(strsplit(seq1, ""))
+seq2_splitted <- unlist(strsplit(seq2, ""))
+
+# Scoring matrix
+m <- matrix(0, rows+1, cols+1)
+# Assign names of columns and rows to the scoring matrix
+colnames(m) <- c("", seq1_splitted)
+rownames(m) <- c("", seq2_splitted)
+
+# Tracing matrix
+m_trace <- m
+```
+
+#### 2. Scoring
+
+The filling of the scoring matrix starts by taking two pointers, _i_ for the row and _j_ for the column that move recursively on each element of the cell of the matrix.
+
+```{r eval=FALSE} 
+for (i in 2:nrow(m)){
+    for (j in 2:ncol(m)){
+      ...
+  }
+}
+```
+
+Each element is scored from left to right (horizontal score), top to bottom (vertical score) in the matrix, considering the outcomes of adding gaps. Each element is then scored from the top-left element in the matrix (diagonal score) that corresponds to the outcome of either having a match or a mismatch in the sequences. 
+
+```{r eval=FALSE} 
+# Calculating the horizontal gap score
+score_left <- m[i,j-1] + gap
+
+# Calculating the vertical gap score
+score_up <- m[i-1,j] + gap
+
+# Calculating the diagonal score (match and mismatch score)
+if(colnames(m)[j] == rownames(m)[i]){
+  score_diag <- m[i-1,j-1] + match
+} else {
+  score_diag <- m[i-1,j-1] + mismatch
+}
+```
+
+If none of the scores are positive, this element gets a 0. This is one of the main differences from the Needleman & Wunsch scoring system which allows the presence of negative values.
+
+```{r eval=FALSE} 
+# Turning negative values to zeros
+if (m[i,j] < 0) {
+  m[i,j] <- 0
+}
+```
+
+Now, in order to form a path for the alignment of the two sequences, in each cell it has to be chosen the highest score among the three types of scores, then the highest scores are set in each cell of the matrix and the tracing matrix stores the source of those scores.
+
+```{r eval=FALSE} 
+# Taking the highest score
+all_scores <- c(score_left, score_up, score_diag)
+m[i,j] <- max(all_scores)
+
+# Filling the tracing matrix 
+m_trace[i,j] <- which(all_scores == m[i,j])[1]
+```
+
+#### 3. Initialization of the variables for the traceback part
+
+The final aligned sequences are initialized as empty vectors. 
+
+```{r eval=FALSE} 
+# Initialization of aligned sequences
+alseq1 <- c()
+alseq2 <- c()
+```
+
+Then, the starting point for the traceback part is the index of the cell with the maximum value of the scoring matrix and the pointers _i_ and _j_ are set respectively at the row and column index.
+
+```{r eval=FALSE} 
+# Get the cell (row and column) of the field with maximum value
+max_index <- which(m==max(m), arr.ind = TRUE)[1,]
+
+# Get the indices of the current field in tracing
+i <- max_index["row"]
+j <- max_index["col"]
+```
+
+#### 4. Traceback
+
+The traceback part starts by evaluating recursively the fields in the scoring matrix that have a score greater than zero and the direction of the path is given by the sources of the scores in the tracing matrix.
+
+With the aid of a `switch` function, each element of the tracing matrix is evaluated with the element of the scoring matrix and depending on the condition (either a gap or a match/mismatch), the elements at the respective position are aligned and stored as vectors that were previously initialized. 
+
+```{r eval=FALSE} 
+while (m[i,j] > 0) {
+  direction <- m_trace[i,j]
+  switch (direction,
+          # Horizontal case: gap in seq2
+          {
+            j <- j-1
+            alseq1 <- c(seq1_splitted[j], alseq1)
+            alseq2 <- c("-", alseq2)
+          },
+          # Vertical case: gap in seq1
+          {
+            i <- i-1
+            alseq1 <- c("-", alseq1)
+            alseq2 <- c(seq2_splitted[i], alseq2)
+          },
+          # Diagonal case: match or mismatch
+          {
+            i <- i-1; j <- j-1;
+            alseq1 <- c(seq1_splitted[j], alseq1)
+            alseq2 <- c(seq2_splitted[i], alseq2)
+          }
+  )
+}
+```
+
+## Example
+
+A possible use of the package could be trying to align two protein sequences coming from two different species for further evaluation of the sequence conservation. 
+
+The idea is that also protein sequences are affected by the same mutations as the DNA sequences: there can be substitutions from one aminoacid for another, or the insertion/deletion of one or multiple adjacent aminoacids.
+
+In the following example, two sequences are aligned coming from the same protein YABBY 2 (from YAB2 transcription factor) from two different species: _Arabidopsis thaliana_ ([accession number: Q9XFB0](https://www.uniprot.org/uniprotkb/Q9XFB0/entry#ptm_processing)) and _Oryza sativa_ ([accession number: Q10FZ7](https://www.uniprot.org/uniprotkb/Q10FZ7/entry)).
+
+The main goal is to extract the most similar subsequences, so the scores are set to be more penalizing for mismatches and gaps, and more favoring for the matches.
+
+```{r setup}
+library(SmithWaterman)
+```
+
+```{r} 
+arabidopsis <- "MSVDFSSERVCYVHCSFCTTILAVSVPYASLFTLVTVRCGHCTNLLSLNIGVSLHQTSAPPIHQ
+DLQPHRQHTTSLVTRKDCASSSRSTNNLSENIDREAPRMPPIRPPEKRQRVPSAYNRFIKEEIQRIKACNPEISHREAFS
+TAAKNWAHFPHIHFGLKLDGNKKGKQLDQSVAGQKSNGYY"
+
+oryza <- "MSAQIVPAPEHVCYVHCNFCNTIFAVSVPSNSMLNIVTVRCGHCTSLLSVNLRGLVQALPAEDHLQDNLK
+MHNMSFRENYSEYGSSSRYGRVPMMFSKNDTEHMLHVRPPEKRQRVPSAYNRFIKEEIRRIKANNPDISHREAFSTAAKN
+WAHFPNIHFGLGSHESSKKLDEAIGAPSPQKVQRLY"
+
+smith_waterman(arabidopsis, oryza, 2, -2, -2) 
+```
+
+The output are the in form of a list of the two aligned subsequences with the highest similarity.
+
+## Session information
+The output of this vignette was produced under the following conditions:
+```{r}
+sessionInfo()
+```
+
+## References
+
+Smith, Temple F. & Waterman, Michael S. (1981). "Identification of Common Molecular
+Subsequences". Journal of Molecular Biology. 147 (1): 195–197.
+
+Martin Raden, Syed M Ali, Omer S Alkhnbashi, Anke Busch, Fabrizio Costa, Jason A Davis, Florian Eggenhofer, Rick Gelhausen, Jens Georg, Steffen Heyne, Michael Hiller, Kousik Kundu, Robert Kleinkauf, Steffen C Lott, Mostafa M Mohamed, Alexander Mattheis, Milad Miladi, Andreas S Richter, Sebastian Will, Joachim Wolff, Patrick R Wright, and Rolf Backofen (2018). "Freiburg RNA tools: a central online resource for RNA-focused research and teaching". Nucleic Acids Research. 46 (W1), W25-W29.
+
+Altschul SF, Pop M. Sequence Alignment. In: Rosen KH, Shier DR, Goddard W, editors. Handbook of Discrete and Combinatorial Mathematics. 2nd edition. Boca Raton (FL): CRC Press/Taylor & Francis; 2017 Nov. Chapter 20.1. Available from: https://www.ncbi.nlm.nih.gov/books/NBK464187/
