@@ -15,7 +15,7 @@ The main expected outcomes of the package were the following:
     b. the first nucleotide sequence,<br>
     c. the second nucleotide sequence.<br>
     
-    As result, returns one optimal alignment between the two input sequences;<br>
+    As result, it returns one optimal alignment between the two input sequences;<br>
   
 3. documentation of the design and development;
 4. the implementation should work smoothly for sequences of length equals to ~500 nucelotides;
@@ -30,10 +30,23 @@ The content of this repository reflects the basic files and directories necessar
 - **R** directory, which stores the `.R` code of the main function.
 - **man** directory, which contains the documentation that will become the help page in the package.
 - **tests** directory, which stores the files for unit testing of the function relying on the `testthat` package.
-- **vignettes** directory, in which are stored a very thorough description of the package developmental process in form of a `.Rmd` file, with explanation of the code and a usage example. 
+- **vignettes** directory, in which is stored a very thorough description of the package developmental process in form of a `.Rmd` file, with explanation of the code and a usage example. The Rmarkdown file can be visualized in form of an HTML by the `knitr` package.
 There are also other files referred to the package in the repository which are automatically generated, plus some `.gitignore` files that refer to the version control changes.<br><br>
 
 ## 3. Package installation
 
-## 4. Package usage
+The package can be installed from from Github with `devtools` in RStudio with the following command:
+```{r}
+> if (!require("devtools")) {install.packages("devtools")}
 
+> devtools::install_github("sonechkina/SmithWaterman")
+```
+
+Alternatively, the package compressed file can be installed from the terminal by typing:
+```
+> R CMD INSTALL SmithWaterman_0.1.0.tar.gz
+```
+Once the package is installed, it can be loaded in the current RStudio session:
+```
+> library(SmithWaterman)
+```
