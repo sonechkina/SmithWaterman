@@ -45,12 +45,6 @@ The package can be installed from Github with `devtools` in RStudio with the fol
 > devtools::install_github("sonechkina/SmithWaterman")
 ```
 
-Alternatively, the package compressed file can be installed from the terminal by typing:
-
-```
-> R CMD INSTALL SmithWaterman_0.1.0.tar.gz
-```
-
 Once the package is installed, it can be loaded in the current RStudio session:
 
 ```
