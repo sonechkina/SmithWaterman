@@ -7,7 +7,7 @@ Authors@R:
     email = "maria.sonechkina@mail.polimi.com",
     role = c("aut", "cre"))
 Description: This package provides a function that performs pairwise local sequence
-    alignment using the Smith-Waterman algorithm to find the optimal global sequence 
+    alignment using the Smith-Waterman algorithm to find the optimal global sequence
     alignment between two sequences.
 License: GPL-2
 Encoding: UTF-8
