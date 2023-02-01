@@ -126,3 +126,5 @@ smith_waterman <- function(seq1, seq2, match, mismatch, gap) {
   # Return a list of the two optimally aligned sequences
   return(list(alseqs = matrix(c(alseq1, alseq2), byrow = TRUE, nrow = 2)))
 }
+
+
