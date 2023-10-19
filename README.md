@@ -22,12 +22,12 @@ The main expected outcomes of the package were the following:
 
 One possible tool that is used in R to develop packages is `devtools`, which allows the instant creation of a "skeleton" that provides the basic structure for organizing the package in a series of files and directories. <br>
 The content of this repository reflects the basic files and directories necessary to build a complete package, which are:
-- DESCRIPTION file: it describes the project, sets up what packages are suggested for the development tasks and applies a license.
-- NAMESPACE file: it is automatically generated and it lists the function in the package.
-- R directory: it stores the `.R` code of the main function.
-- man directory: it contains the documentation that will become the help page in the package.
-- tests directory: it stores the files for unit testing of the function, relying on the `testthat` package.
-- vignettes directory: inside it is stored a very thorough description of the package developmental process in form of a `.Rmd` file, with explanation of the code abd a usage example. The RMarkdown file can be converted into an HTML file with `knitr`.<br>
+- **DESCRIPTION** file: it describes the project, sets up what packages are suggested for the development tasks and applies a license.
+- **NAMESPACE** file: it is automatically generated and it lists the function in the package.
+- **R** directory: it stores the `.R` code of the main function.
+- **man** directory: it contains the documentation that will become the help page in the package.
+- **tests** directory: it stores the files for unit testing of the function, relying on the `testthat` package.
+- **vignettes** directory: inside it is stored a very thorough description of the package developmental process in form of a `.Rmd` file, with explanation of the code abd a usage example. The RMarkdown file can be converted into an HTML file with `knitr`.<br>
 
 There are also other files referred to the package inside the repository which are automatically generated, plus some `.gitignore` files that refer to the version control changes.<br>
 
