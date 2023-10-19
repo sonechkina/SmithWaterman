@@ -7,18 +7,18 @@ The aim of the project was to develop a package in R which implements the local 
 This project has been developed as a standard R package that could be used locally on RStudio, not as a compliant Bioconductor package. <br><br>
 The main expected outcomes of the package were the following:
 1. appropriate data structures for the implementation of the S-W algorithm;
-2. a function that takes as parameters:
+2. a function that takes as parameters: <br>
     a1. cost of a match, <br>
     a2. cost of a mismatch, <br> 
     a3. cost of a gap, <br>
     b. first nucleotide sequence, <br>
     c. second nucleotide sequence. <br>
-    As result, it returns on optimal alignment between the two input sequences; <br>
+    As result, the function returns on optimal alignment between the two input sequences; <br>
 3. documentation of the design and development;
 4. the implementation should work smoothly for sequences of length equals to ~500 nucleotides;
 5. an optional unit testing implementation. <br><br>
 
-## 2. What does th repository store?
+## 2. What does the repository store?
 
 One possible tool that is used in R to develop packages is `devtools`, which allows the instant creation of a "skeleton" that provides the basic structure for organizing the package in a series of files and directories. <br>
 The content of this repository reflects the basic files and directories necessary to build a complete package, which are:
